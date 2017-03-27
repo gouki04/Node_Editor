@@ -18,11 +18,11 @@ namespace NodeEditorFramework.Standard
         public string body_text = "";
         public string player_name = "";
 
+        [System.Serializable]
         public class Choice
         {
             public string name = "";
             public string text = "";
-            public NodeOutput output = null;
         }
 
         public const int MinChoiceCnt = 2;
@@ -47,7 +47,8 @@ namespace NodeEditorFramework.Standard
         {
             var choice = new Choice();
             choice.name = "choice" + choices.Count;
-            choice.output = NodeOutput.Create(this, choice.name, "Dialogue");
+
+            NodeOutput.Create(this, choice.name, "Dialogue");
 
             choices.Add(choice);
         }
@@ -59,14 +60,15 @@ namespace NodeEditorFramework.Standard
             }
 
             var choice = choices[choices.Count - 1];
-            while (choice.output.connections.Count != 0) {
-                choice.output.connections[0].RemoveConnection();
+            var output = Outputs[choices.Count - 1];
+            while (output.connections.Count != 0) {
+                output.connections[0].RemoveConnection();
             }
 
-            Outputs.Remove(choice.output);
+            Outputs.Remove(output);
             choices.Remove(choice);
 
-            choice.output.Delete();
+            output.Delete();
         }
 
         protected internal override void NodeGUI()
@@ -93,9 +95,9 @@ namespace NodeEditorFramework.Standard
             GUILayout.EndHorizontal();
 
             body_text = EditorGUILayout.TextArea(body_text, GUILayout.Height(80));
-            foreach (var choice in choices) {
-                choice.output.DisplayLayout();
-                choice.text = EditorGUILayout.TextField(choice.text);
+            for (var i = 0; i < choices.Count; ++i) { 
+                Outputs[i].DisplayLayout();
+                choices[i].text = EditorGUILayout.TextField(choices[i].text);
             }
 
             rect.height = 150 + 35 * choices.Count;
